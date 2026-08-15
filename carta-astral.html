@@ -1,0 +1,1512 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070817">
+  <meta name="description" content="Descubre tu carta astral, tus patrones y tu potencial en una experiencia visual e interactiva.">
+  <title>Alma Astral — Tu carta, tu potencial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #f8f2e8;
+      --muted: #b9b3c8;
+      --gold: #e9c886;
+      --gold-strong: #f6d99b;
+      --violet: #a78bfa;
+      --blue: #7dd3fc;
+      --night: #070817;
+      --night-2: #0b0d24;
+      --panel: rgba(13, 14, 39, .72);
+      --panel-solid: #10122c;
+      --line: rgba(233, 200, 134, .24);
+      --line-soft: rgba(255,255,255,.1);
+      --shadow: 0 30px 90px rgba(0, 0, 0, .42);
+      --serif: "Cormorant Garamond", Georgia, serif;
+      --sans: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --radius: 26px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(106, 58, 177, .24), transparent 34rem),
+        radial-gradient(circle at 92% 38%, rgba(21, 96, 138, .18), transparent 35rem),
+        linear-gradient(180deg, #070817 0%, #090a1c 55%, #070817 100%);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      opacity: .55;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,.8) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 72% 12%, rgba(245,210,145,.65) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 35% 72%, rgba(255,255,255,.6) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 86% 65%, rgba(166,139,250,.7) 0 1px, transparent 1.7px);
+      background-size: 210px 190px, 260px 230px, 180px 220px, 290px 260px;
+    }
+
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { color: inherit; }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: rgba(233, 200, 134, .28); color: #fff; }
+
+    .three-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .9;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      opacity: .025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+    }
+
+    .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .19em;
+      font-size: .72rem;
+      font-weight: 700;
+    }
+    .eyebrow::before { content: "✦"; font-size: .78rem; }
+    .section-kicker { margin-bottom: 18px; }
+    .display {
+      font-family: var(--serif);
+      font-weight: 500;
+      letter-spacing: -.035em;
+      line-height: .92;
+      margin: 0;
+    }
+    .section-title { font-size: clamp(2.3rem, 5vw, 4.4rem); max-width: 800px; }
+    .section-copy { color: var(--muted); line-height: 1.75; max-width: 650px; }
+
+    .topbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 30;
+      border-bottom: 1px solid transparent;
+      transition: background .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+    }
+    .topbar.scrolled {
+      background: rgba(6,7,21,.76);
+      border-color: rgba(255,255,255,.08);
+      backdrop-filter: blur(18px);
+    }
+    .nav {
+      height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .brand { display: inline-flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(233,200,134,.58);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--gold);
+      box-shadow: 0 0 30px rgba(233,200,134,.12), inset 0 0 18px rgba(233,200,134,.07);
+      font-size: 1.15rem;
+    }
+    .brand-copy strong { display: block; font-family: var(--serif); font-size: 1.25rem; letter-spacing: .04em; }
+    .brand-copy span { display: block; color: var(--muted); font-size: .61rem; letter-spacing: .18em; text-transform: uppercase; margin-top: -2px; }
+    .nav-links { display: flex; align-items: center; gap: 28px; color: #d8d2e2; font-size: .82rem; }
+    .nav-links a { transition: color .2s ease; }
+    .nav-links a:hover { color: var(--gold); }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      min-height: 52px;
+      padding: 0 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: .86rem;
+      letter-spacing: .015em;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+    .btn:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+      outline: 2px solid var(--gold-strong);
+      outline-offset: 3px;
+    }
+    .btn-primary {
+      color: #17121d;
+      background: linear-gradient(110deg, #f4d99e, #d9af62);
+      box-shadow: 0 12px 34px rgba(217, 175, 98, .2), inset 0 1px rgba(255,255,255,.55);
+    }
+    .btn-primary:hover { box-shadow: 0 16px 44px rgba(217, 175, 98, .32), inset 0 1px rgba(255,255,255,.55); }
+    .btn-ghost { border: 1px solid var(--line-soft); background: rgba(255,255,255,.035); color: var(--ink); }
+    .btn-ghost:hover { background: rgba(255,255,255,.07); border-color: rgba(233,200,134,.35); }
+    .btn-small { min-height: 40px; padding: 0 17px; font-size: .76rem; }
+    .btn-wide { width: 100%; }
+    .btn[disabled] { opacity: .6; cursor: wait; transform: none; }
+    .arrow { font-size: 1.05rem; transition: transform .2s ease; }
+    .btn:hover .arrow { transform: translateX(3px); }
+
+    .hero {
+      min-height: 100svh;
+      position: relative;
+      display: grid;
+      align-items: center;
+      padding: 128px 0 70px;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: min(880px, 86vw);
+      height: 1px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, transparent, rgba(233,200,134,.4), transparent);
+    }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(360px, .72fr); gap: 70px; align-items: center; }
+    .hero h1 { font-size: clamp(4rem, 8.6vw, 7.9rem); max-width: 850px; }
+    .hero h1 em { color: var(--gold); font-weight: 500; }
+    .hero-lead { font-size: clamp(1rem, 2vw, 1.22rem); max-width: 610px; color: #cbc5d5; line-height: 1.7; margin: 30px 0 34px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .trust-note { display: flex; align-items: center; gap: 10px; color: #9e98ad; font-size: .75rem; margin-top: 20px; }
+    .trust-note span:first-child { color: var(--gold); }
+
+    .orbit-card {
+      position: relative;
+      width: min(420px, 100%);
+      aspect-ratio: 1;
+      justify-self: end;
+      display: grid;
+      place-items: center;
+    }
+    .orbit-card::before,
+    .orbit-card::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(233,200,134,.19);
+    }
+    .orbit-card::before { inset: 0; box-shadow: inset 0 0 70px rgba(123,84,192,.09), 0 0 80px rgba(58,70,160,.08); }
+    .orbit-card::after { inset: 13%; border-style: dashed; animation: orbit 30s linear infinite; }
+    .orbit-inner {
+      position: absolute;
+      inset: 24%;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 40% 35%, rgba(246,217,155,.2), rgba(45,31,80,.32) 38%, rgba(7,8,23,.8) 72%);
+      border: 1px solid rgba(233,200,134,.35);
+      box-shadow: 0 0 90px rgba(119,78,175,.18), inset 0 0 45px rgba(0,0,0,.4);
+    }
+    .orbit-sun { font-size: 4.8rem; color: var(--gold); text-shadow: 0 0 34px rgba(244,210,140,.5); }
+    .orbit-label {
+      position: absolute;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(9,10,29,.68);
+      backdrop-filter: blur(10px);
+      color: #d8d1e0;
+      font-size: .7rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .orbit-label.one { top: 7%; left: 17%; }
+    .orbit-label.two { top: 47%; right: -4%; }
+    .orbit-label.three { bottom: 3%; left: 20%; }
+    .orbit-dot {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--gold-strong);
+      box-shadow: 0 0 20px rgba(246,217,155,.7);
+      top: 49%; left: -5px;
+    }
+    @keyframes orbit { to { transform: rotate(360deg); } }
+
+    .hero-proof {
+      position: absolute;
+      bottom: 26px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: #858096;
+      font-size: .68rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .hero-proof::before, .hero-proof::after { content: ""; width: 42px; height: 1px; background: rgba(233,200,134,.25); }
+
+    .how { padding: 120px 0 90px; }
+    .how-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 48px; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
+    .step { padding: 32px 32px 10px 0; position: relative; }
+    .step + .step { padding-left: 32px; border-left: 1px solid var(--line-soft); }
+    .step-num { color: var(--gold); font-family: var(--serif); font-size: 1.25rem; margin-bottom: 46px; }
+    .step h3 { font-family: var(--serif); font-size: 1.8rem; font-weight: 500; margin: 0 0 10px; }
+    .step p { color: var(--muted); font-size: .87rem; line-height: 1.7; margin: 0; }
+
+    .reading-section { padding: 80px 0 130px; position: relative; }
+    .form-layout { display: grid; grid-template-columns: .72fr 1.28fr; gap: 70px; align-items: start; }
+    .form-intro { position: sticky; top: 120px; }
+    .form-intro .section-title { font-size: clamp(2.7rem, 4.6vw, 4.4rem); }
+    .form-intro p { color: var(--muted); line-height: 1.75; }
+    .mini-points { display: grid; gap: 14px; margin-top: 30px; }
+    .mini-point { display: flex; gap: 12px; align-items: flex-start; color: #d7d1df; font-size: .82rem; }
+    .mini-point span { color: var(--gold); }
+
+    .glass-card {
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, rgba(20,21,55,.83), rgba(10,11,31,.76));
+      backdrop-filter: blur(18px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow), inset 0 1px rgba(255,255,255,.05);
+    }
+    .birth-card { padding: clamp(24px, 4vw, 46px); position: relative; overflow: hidden; }
+    .birth-card::before {
+      content: "";
+      position: absolute;
+      width: 230px;
+      height: 230px;
+      right: -110px;
+      top: -120px;
+      border-radius: 50%;
+      border: 1px solid rgba(233,200,134,.13);
+      box-shadow: 0 0 70px rgba(123,84,192,.12);
+    }
+    .form-top { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 32px; }
+    .form-top h3 { margin: 0; font-family: var(--serif); font-size: 2rem; font-weight: 500; }
+    .demo-btn { background: none; border: 0; color: var(--gold); cursor: pointer; font-size: .73rem; text-decoration: underline; text-underline-offset: 4px; }
+    .field { margin-bottom: 22px; }
+    .field label, .field-label { display: block; color: #ddd7e4; font-size: .74rem; font-weight: 700; letter-spacing: .04em; margin-bottom: 9px; }
+    .optional { color: #817b91; font-weight: 500; }
+    .field-grid { display: grid; grid-template-columns: .68fr 1.45fr 1fr; gap: 10px; }
+    .field-grid.two { grid-template-columns: 1fr 1fr; }
+    .input-wrap { position: relative; }
+    input, select {
+      width: 100%;
+      min-height: 54px;
+      padding: 0 15px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(5,6,22,.6);
+      color: var(--ink);
+      transition: border .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    input::placeholder { color: #716c80; }
+    input:hover, select:hover { border-color: rgba(233,200,134,.28); }
+    input:focus, select:focus { border-color: rgba(233,200,134,.58); box-shadow: 0 0 0 4px rgba(233,200,134,.08); background: rgba(7,8,26,.85); }
+    select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, #a9a2b5 50%), linear-gradient(135deg, #a9a2b5 50%, transparent 50%); background-position: calc(100% - 19px) 23px, calc(100% - 14px) 23px; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+    select option { background: #11132d; color: var(--ink); }
+    .hint { color: #847e91; font-size: .68rem; line-height: 1.5; margin: 8px 0 0; }
+    .check-row { display: flex; align-items: center; gap: 10px; margin-top: 11px; color: #a9a3b4; font-size: .74rem; cursor: pointer; width: fit-content; }
+    .check-row input { appearance: none; width: 18px; height: 18px; min-height: 0; padding: 0; border-radius: 5px; position: relative; }
+    .check-row input:checked { background: var(--gold); border-color: var(--gold); }
+    .check-row input:checked::after { content: "✓"; color: #17121d; font-size: 12px; font-weight: 900; position: absolute; left: 3px; top: -1px; }
+    .privacy-line { display: flex; gap: 9px; align-items: flex-start; color: #837d90; font-size: .66rem; line-height: 1.5; margin: 16px 4px 0; }
+    .privacy-line span { color: var(--gold); }
+    .form-error { display: none; padding: 12px 14px; border-radius: 12px; background: rgba(180,54,73,.12); border: 1px solid rgba(235,97,117,.26); color: #ffb5c0; font-size: .74rem; line-height: 1.5; margin: 0 0 14px; }
+    .form-error.show { display: block; }
+
+    .loading-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      background: rgba(7,8,24,.94);
+      backdrop-filter: blur(15px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+    }
+    .loading-layer.show { display: flex; }
+    .loader-orbit { width: 106px; height: 106px; border-radius: 50%; border: 1px solid rgba(233,200,134,.25); position: relative; margin: 0 auto 26px; }
+    .loader-orbit::before { content: "✦"; position: absolute; color: var(--gold); left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 1.8rem; text-shadow: 0 0 24px var(--gold); }
+    .loader-orbit::after { content: ""; position: absolute; width: 11px; height: 11px; border-radius: 50%; background: var(--gold); left: 48px; top: -6px; transform-origin: 5px 59px; animation: orbit 1.6s linear infinite; box-shadow: 0 0 17px var(--gold); }
+    .loading-layer h4 { font-family: var(--serif); font-size: 1.7rem; font-weight: 500; margin: 0 0 9px; }
+    .loading-layer p { color: var(--muted); font-size: .78rem; margin: 0; }
+
+    .results { display: none; padding: 70px 0 150px; }
+    .results.show { display: block; animation: reveal .8s ease both; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+
+    .result-topline { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 36px; }
+    .result-title { font-size: clamp(3rem, 7vw, 6.1rem); margin-bottom: 12px; }
+    .result-meta { color: var(--muted); font-family: var(--serif); font-style: italic; font-size: 1.2rem; }
+    .result-actions { display: flex; gap: 9px; flex-wrap: wrap; justify-content: flex-end; }
+
+    .chart-stage {
+      display: grid;
+      grid-template-columns: minmax(420px, .95fr) 1.05fr;
+      gap: 34px;
+      padding: clamp(20px, 4vw, 40px);
+      overflow: hidden;
+      position: relative;
+    }
+    .chart-stage::before { content: ""; position: absolute; inset: auto -10% -45% 20%; height: 80%; background: radial-gradient(ellipse, rgba(98,61,156,.18), transparent 67%); pointer-events: none; }
+    .wheel-wrap { position: relative; aspect-ratio: 1; display: grid; place-items: center; min-width: 0; }
+    .wheel-wrap::before { content: ""; position: absolute; inset: 7%; border-radius: 50%; box-shadow: 0 0 80px rgba(115,84,179,.17); }
+    #natalChart { width: 100%; height: 100%; position: relative; z-index: 1; }
+    .chart-insight { padding: 24px 10px 24px 0; align-self: center; position: relative; z-index: 1; }
+    .chart-insight h2 { font-size: clamp(2.5rem, 4vw, 4rem); margin: 12px 0 22px; }
+    .cosmic-summary { color: #ded8e5; font-family: var(--serif); font-style: italic; font-size: clamp(1.25rem, 2.3vw, 1.7rem); line-height: 1.45; margin: 0 0 28px; }
+    .signature-row { display: flex; gap: 9px; flex-wrap: wrap; }
+    .signature-pill { padding: 9px 13px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.035); border-radius: 999px; color: #cfc9d6; font-size: .69rem; }
+
+    .big-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 18px 0 58px; }
+    .pillar { padding: 27px; position: relative; overflow: hidden; min-height: 205px; }
+    .pillar::after { content: attr(data-glyph); position: absolute; right: 18px; top: 8px; font-size: 5.4rem; color: rgba(233,200,134,.08); font-family: serif; }
+    .pillar-label { color: var(--gold); text-transform: uppercase; letter-spacing: .14em; font-size: .65rem; font-weight: 700; }
+    .pillar h3 { font-family: var(--serif); font-size: 2rem; font-weight: 500; margin: 18px 0 7px; }
+    .pillar-degree { color: #918a9f; font-size: .72rem; }
+    .pillar p { color: #c3bdca; font-size: .8rem; line-height: 1.6; margin: 14px 0 0; max-width: 320px; }
+
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    .report-card { padding: clamp(25px, 3.5vw, 38px); }
+    .report-card.full { grid-column: 1 / -1; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 20px; margin-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
+    .card-head h3 { font-family: var(--serif); font-weight: 500; font-size: 2rem; margin: 0; }
+    .card-symbol { color: var(--gold); font-size: 1.3rem; }
+
+    .planet-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0 34px; }
+    .planet-row { display: grid; grid-template-columns: 32px 1fr auto; gap: 9px; align-items: center; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .planet-glyph { color: var(--gold); font-size: 1.25rem; text-align: center; }
+    .planet-name { font-size: .78rem; color: #ddd7e2; }
+    .planet-name small { display: block; color: #777184; font-size: .62rem; margin-top: 3px; }
+    .planet-pos { color: #a59eae; font-size: .68rem; white-space: nowrap; }
+
+    .aspect-list { display: grid; gap: 10px; }
+    .aspect-item { display: grid; grid-template-columns: 40px 1fr; gap: 13px; padding: 12px 0; }
+    .aspect-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(233,200,134,.24); color: var(--gold); }
+    .aspect-item strong { display: block; font-size: .78rem; margin-bottom: 5px; }
+    .aspect-item p { margin: 0; color: var(--muted); font-size: .72rem; line-height: 1.55; }
+
+    .element-bars { display: grid; gap: 17px; }
+    .bar-label { display: flex; justify-content: space-between; color: #cfc8d5; font-size: .72rem; margin-bottom: 7px; }
+    .bar-track { height: 5px; border-radius: 999px; background: rgba(255,255,255,.07); overflow: hidden; }
+    .bar-fill { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--gold), var(--violet)); transition: width 1s .2s ease; }
+    .personality-keys { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 25px; }
+    .personality-key { padding: 9px 12px; border-radius: 10px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.07); color: #beb7c7; font-size: .68rem; }
+
+    .narrative-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line-soft); }
+    .narrative { background: rgba(10,11,31,.92); padding: 28px; }
+    .narrative .n-icon { color: var(--gold); font-size: 1.4rem; }
+    .narrative h4 { font-family: var(--serif); font-size: 1.55rem; font-weight: 500; margin: 18px 0 10px; }
+    .narrative p { color: var(--muted); font-size: .76rem; line-height: 1.65; margin: 0; }
+
+    .tarot-offer {
+      margin-top: 58px;
+      position: relative;
+      overflow: hidden;
+      padding: clamp(32px, 6vw, 68px);
+      background:
+        radial-gradient(circle at 90% 0%, rgba(233,200,134,.17), transparent 28rem),
+        radial-gradient(circle at 12% 100%, rgba(121,78,181,.25), transparent 32rem),
+        linear-gradient(135deg, rgba(23,20,51,.95), rgba(8,9,27,.96));
+    }
+    .tarot-offer::before { content: "✦"; position: absolute; right: 7%; top: 5%; color: rgba(233,200,134,.1); font-size: 13rem; line-height: 1; }
+    .offer-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 70px; align-items: center; position: relative; }
+    .offer-copy h2 { font-size: clamp(2.8rem, 5.5vw, 5.3rem); margin: 17px 0 24px; }
+    .offer-copy p { color: #c8c2d0; max-width: 650px; line-height: 1.7; }
+    .personal-question { margin: 26px 0 0; padding: 18px 20px; border-left: 2px solid var(--gold); background: rgba(255,255,255,.035); color: #e2dae6; font-family: var(--serif); font-style: italic; font-size: 1.14rem; line-height: 1.5; }
+    .price-card { padding: 30px; border: 1px solid rgba(233,200,134,.28); border-radius: 22px; background: rgba(6,7,22,.55); box-shadow: 0 24px 70px rgba(0,0,0,.26); }
+    .offer-badge { display: inline-flex; padding: 7px 10px; border-radius: 999px; background: rgba(233,200,134,.14); border: 1px solid rgba(233,200,134,.24); color: var(--gold); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .price { display: flex; align-items: baseline; gap: 11px; margin: 22px 0 5px; }
+    .price strong { font-family: var(--serif); font-size: 3.7rem; font-weight: 500; }
+    .price del { color: #7f788c; font-size: .85rem; }
+    .price-note { color: #8e879a; font-size: .68rem; margin-bottom: 22px; }
+    .offer-includes { list-style: none; padding: 0; margin: 0 0 24px; display: grid; gap: 11px; }
+    .offer-includes li { color: #c8c1ce; font-size: .73rem; display: flex; align-items: center; gap: 9px; }
+    .offer-includes li::before { content: "✓"; color: var(--gold); font-weight: 800; }
+    .no-charge { color: #7c7688; text-align: center; font-size: .6rem; line-height: 1.5; margin: 11px 0 0; }
+
+    footer { padding: 36px 0 45px; border-top: 1px solid rgba(255,255,255,.07); color: #777182; }
+    .footer-grid { display: flex; justify-content: space-between; gap: 35px; align-items: flex-start; }
+    footer p { max-width: 720px; font-size: .65rem; line-height: 1.65; margin: 0; }
+    .footer-mark { color: var(--gold); font-family: var(--serif); white-space: nowrap; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(3,4,14,.82);
+      backdrop-filter: blur(16px);
+    }
+    .modal.show { display: flex; }
+    .modal-card { width: min(520px, 100%); max-height: min(720px, calc(100svh - 30px)); overflow-y: auto; padding: clamp(26px, 5vw, 42px); position: relative; }
+    .modal-close { position: absolute; right: 18px; top: 17px; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); cursor: pointer; color: #bcb5c5; }
+    .modal-card h2 { font-size: 2.8rem; margin: 15px 0 12px; }
+    .modal-card > p { color: var(--muted); font-size: .78rem; line-height: 1.65; }
+    .modal-question { padding: 15px; border-radius: 13px; background: rgba(233,200,134,.08); color: #e6d7bb; font-family: var(--serif); font-style: italic; line-height: 1.45; margin: 20px 0; }
+    .modal-actions { display: grid; gap: 10px; margin-top: 18px; }
+    .copy-status { min-height: 18px; color: var(--gold); text-align: center; font-size: .66rem; }
+
+    .toast { position: fixed; left: 50%; bottom: 24px; z-index: 70; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; border: 1px solid rgba(233,200,134,.25); background: rgba(10,11,29,.94); color: #ece3d4; box-shadow: 0 16px 45px rgba(0,0,0,.35); backdrop-filter: blur(12px); padding: 12px 17px; border-radius: 999px; font-size: .7rem; transition: opacity .25s ease, transform .25s ease; text-align: center; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .mobile-offer { display: none; }
+
+    @media (max-width: 980px) {
+      .hero-grid { grid-template-columns: 1fr .56fr; gap: 28px; }
+      .orbit-card { opacity: .72; }
+      .form-layout { grid-template-columns: 1fr; gap: 36px; }
+      .form-intro { position: static; max-width: 700px; }
+      .chart-stage { grid-template-columns: 1fr; }
+      .wheel-wrap { width: min(560px, 100%); justify-self: center; }
+      .chart-insight { padding: 0 12px 15px; text-align: center; }
+      .signature-row { justify-content: center; }
+      .offer-grid { grid-template-columns: 1fr .72fr; gap: 32px; }
+      .narrative-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 28px, 650px); }
+      .nav { height: 68px; }
+      .brand-copy span, .nav-links { display: none; }
+      .topbar .btn-small { min-height: 38px; padding: 0 14px; }
+      .hero { padding-top: 104px; min-height: 100svh; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-copy { position: relative; z-index: 2; }
+      .hero h1 { font-size: clamp(3.8rem, 18vw, 5.5rem); max-width: 95%; }
+      .hero-lead { font-size: .98rem; margin-top: 24px; }
+      .orbit-card { position: absolute; right: -105px; top: 120px; width: 330px; opacity: .36; }
+      .orbit-label { display: none; }
+      .hero-actions { display: grid; grid-template-columns: 1fr; }
+      .hero-actions .btn { width: 100%; }
+      .hero-proof { display: none; }
+      .how { padding: 90px 0 60px; }
+      .how-head { display: block; }
+      .how-head .section-copy { margin-top: 22px; }
+      .steps { grid-template-columns: 1fr; }
+      .step { padding: 26px 0; display: grid; grid-template-columns: 45px 1fr; column-gap: 12px; }
+      .step + .step { padding-left: 0; border-left: 0; border-top: 1px solid var(--line-soft); }
+      .step-num { margin: 3px 0 0; grid-row: 1 / 3; }
+      .step h3 { font-size: 1.6rem; }
+      .reading-section { padding: 60px 0 90px; }
+      .birth-card { padding: 24px 18px; border-radius: 20px; }
+      .form-top { align-items: flex-start; }
+      .field-grid { grid-template-columns: .72fr 1.25fr .9fr; gap: 7px; }
+      .field-grid.two { grid-template-columns: 1fr; }
+      input, select { padding: 0 12px; font-size: .85rem; }
+      .results { padding-top: 45px; padding-bottom: 120px; }
+      .result-topline { display: block; }
+      .result-actions { justify-content: flex-start; margin-top: 22px; }
+      .result-actions .btn { flex: 1; }
+      .chart-stage { padding: 13px; border-radius: 20px; }
+      .chart-insight { padding: 0 10px 18px; }
+      .big-three { grid-template-columns: 1fr; gap: 10px; margin-bottom: 38px; }
+      .pillar { min-height: 175px; padding: 23px; }
+      .report-grid { grid-template-columns: 1fr; }
+      .report-card.full { grid-column: auto; }
+      .planet-list { grid-template-columns: 1fr; }
+      .offer-grid { grid-template-columns: 1fr; }
+      .tarot-offer { padding: 32px 20px; border-radius: 20px; }
+      .tarot-offer::before { font-size: 9rem; right: -4%; }
+      .offer-copy h2 { font-size: 3.2rem; }
+      .price-card { padding: 24px 20px; }
+      .footer-grid { display: block; }
+      .footer-mark { display: block; margin-top: 16px; }
+      .mobile-offer {
+        position: fixed;
+        z-index: 28;
+        left: 10px;
+        right: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom));
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 9px 9px 15px;
+        border: 1px solid rgba(233,200,134,.32);
+        border-radius: 17px;
+        background: rgba(8,9,27,.9);
+        box-shadow: 0 20px 55px rgba(0,0,0,.45);
+        backdrop-filter: blur(18px);
+      }
+      body.has-results .mobile-offer { display: flex; }
+      .mobile-offer small { display: block; color: #8e8797; font-size: .55rem; }
+      .mobile-offer strong { font-family: var(--serif); color: var(--gold); font-size: 1.22rem; }
+      .mobile-offer .btn { min-height: 42px; padding: 0 15px; font-size: .68rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      .three-canvas { opacity: .46; }
+    }
+
+    @media print {
+      .topbar, .hero, .how, .reading-section, .result-actions, .tarot-offer, .mobile-offer, footer, .three-canvas, .noise { display: none !important; }
+      body { background: #fff; color: #111; }
+      .results { display: block !important; padding: 0; }
+      .glass-card, .report-card, .pillar { background: #fff; color: #111; box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      .shell { width: 100%; }
+      .result-meta, .section-copy, .pillar p, .planet-name, .narrative p, .aspect-item p { color: #444; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="cosmos" class="three-canvas" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+
+  <header class="topbar" id="topbar">
+    <nav class="nav shell" aria-label="Navegación principal">
+      <a class="brand" href="#inicio" aria-label="Alma Astral, inicio">
+        <span class="brand-mark">☼</span>
+        <span class="brand-copy"><strong>Alma Astral</strong><span>Lecturas de cielo</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#lectura">Mi lectura</a>
+      </div>
+      <button class="btn btn-primary btn-small" type="button" data-scroll="#lectura">Crear mi carta <span class="arrow">→</span></button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="shell hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Lectura astral personalizada</span>
+          <h1 class="display">Tu mapa.<br><em>Tu potencial.</em></h1>
+          <p class="hero-lead">El cielo no decide por ti. Te muestra patrones, talentos y posibilidades para que puedas elegir con más claridad quién quieres ser.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" type="button" data-scroll="#lectura">Revelar mi carta gratis <span class="arrow">→</span></button>
+            <button class="btn btn-ghost" type="button" data-scroll="#como-funciona">Ver cómo funciona <span>↓</span></button>
+          </div>
+          <div class="trust-note"><span>✦</span> Sin registro · Resultado inmediato · Lectura privada</div>
+        </div>
+        <div class="orbit-card" aria-hidden="true">
+          <span class="orbit-dot"></span>
+          <div class="orbit-inner"><span class="orbit-sun">☼</span></div>
+          <span class="orbit-label one">Identidad</span>
+          <span class="orbit-label two">Emoción</span>
+          <span class="orbit-label three">Dirección</span>
+        </div>
+      </div>
+      <div class="hero-proof">Una lectura para volver a ti</div>
+    </section>
+
+    <section class="how" id="como-funciona">
+      <div class="shell">
+        <div class="how-head">
+          <div>
+            <span class="eyebrow section-kicker">Tu cielo, traducido</span>
+            <h2 class="display section-title">Más que tu signo solar.</h2>
+          </div>
+          <p class="section-copy">La fecha sitúa los planetas. La hora y el lugar revelan cómo ese cielo se proyecta sobre tu experiencia personal.</p>
+        </div>
+        <div class="steps">
+          <article class="step"><div class="step-num">01</div><div><h3>Ingresa tus datos</h3><p>Fecha, hora y ciudad de nacimiento. Mientras más exacta sea la hora, más precisa será la lectura.</p></div></article>
+          <article class="step"><div class="step-num">02</div><div><h3>Leemos tu cielo</h3><p>Calculamos tus posiciones, ascendente, balance de elementos y aspectos principales.</p></div></article>
+          <article class="step"><div class="step-num">03</div><div><h3>Elige tu dirección</h3><p>Recibe una síntesis visual con tus dones, desafíos y preguntas para desbloquear tu siguiente paso.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="reading-section" id="lectura">
+      <div class="shell form-layout">
+        <div class="form-intro">
+          <span class="eyebrow section-kicker">Comienza tu lectura</span>
+          <h2 class="display section-title">¿Dónde comenzó tu historia?</h2>
+          <p>Con estos datos recreamos el cielo del instante en que naciste. No necesitas saber nada de astrología.</p>
+          <div class="mini-points">
+            <div class="mini-point"><span>✦</span><div>Tu carta completa, explicada en lenguaje claro.</div></div>
+            <div class="mini-point"><span>✦</span><div>Infografía natal lista para descargar.</div></div>
+            <div class="mini-point"><span>✦</span><div>Una pregunta guía para convertir la lectura en acción.</div></div>
+          </div>
+        </div>
+
+        <form class="glass-card birth-card" id="birthForm" novalidate>
+          <div class="loading-layer" id="loadingLayer" aria-live="polite">
+            <div><div class="loader-orbit"></div><h4 id="loadingTitle">Trazando tus coordenadas…</h4><p id="loadingText">Buscando el instante exacto en el cielo.</p></div>
+          </div>
+          <div class="form-top">
+            <h3>Datos de nacimiento</h3>
+            <button class="demo-btn" id="demoBtn" type="button">Probar con un ejemplo</button>
+          </div>
+
+          <div class="field">
+            <label for="name">Tu nombre <span class="optional">(opcional)</span></label>
+            <input id="name" name="name" autocomplete="name" maxlength="40" placeholder="¿Cómo quieres que te llamemos?">
+          </div>
+
+          <div class="field">
+            <span class="field-label">Fecha de nacimiento</span>
+            <div class="field-grid">
+              <select id="day" name="day" aria-label="Día de nacimiento" required>
+                <option value="">Día</option>
+              </select>
+              <select id="month" name="month" aria-label="Mes de nacimiento" required>
+                <option value="">Mes</option>
+                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option>
+                <option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option>
+                <option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+              </select>
+              <input id="year" name="year" type="number" inputmode="numeric" min="1900" max="2026" placeholder="Año" aria-label="Año de nacimiento" required>
+            </div>
+          </div>
+
+          <div class="field-grid two">
+            <div class="field">
+              <label for="time">Hora de nacimiento</label>
+              <input id="time" name="time" type="time" required>
+              <label class="check-row" for="unknownTime"><input id="unknownTime" type="checkbox"> No conozco la hora</label>
+            </div>
+            <div class="field">
+              <label for="place">Ciudad de nacimiento</label>
+              <input id="place" name="place" list="cities" autocomplete="off" placeholder="Ej. Osorno, Chile" required>
+              <datalist id="cities">
+                <option value="Santiago, Chile"><option value="Valparaíso, Chile"><option value="Viña del Mar, Chile"><option value="Concepción, Chile"><option value="Temuco, Chile"><option value="Osorno, Chile"><option value="Puerto Montt, Chile"><option value="La Serena, Chile"><option value="Antofagasta, Chile"><option value="Punta Arenas, Chile"><option value="Buenos Aires, Argentina"><option value="Lima, Perú"><option value="Bogotá, Colombia"><option value="Ciudad de México, México"><option value="Madrid, España">
+              </datalist>
+            </div>
+          </div>
+          <p class="hint">La ciudad nos permite calcular tu ascendente y las casas. Si no conoces la hora, igualmente obtendrás una lectura parcial.</p>
+          <div class="form-error" id="formError" role="alert"></div>
+          <button class="btn btn-primary btn-wide" id="generateBtn" type="submit">Crear mi carta astral <span class="arrow">✦</span></button>
+          <div class="privacy-line"><span>⌁</span><div>La lectura se calcula en tu navegador. Al buscar una ciudad solo consultamos sus coordenadas geográficas.</div></div>
+        </form>
+      </div>
+    </section>
+
+    <section class="results" id="resultado" aria-live="polite">
+      <div class="shell">
+        <div class="result-topline">
+          <div>
+            <span class="eyebrow">Tu cielo natal</span>
+            <h2 class="display result-title" id="resultTitle">Carta astral</h2>
+            <div class="result-meta" id="resultMeta"></div>
+          </div>
+          <div class="result-actions">
+            <button class="btn btn-ghost btn-small" type="button" id="copySummary">Copiar resumen</button>
+            <button class="btn btn-primary btn-small" type="button" id="downloadChart">Descargar infografía ↓</button>
+          </div>
+        </div>
+
+        <section class="glass-card chart-stage" aria-label="Rueda e interpretación principal de la carta natal">
+          <div class="wheel-wrap"><canvas id="natalChart" role="img" aria-label="Rueda de posiciones planetarias de la carta natal"></canvas></div>
+          <div class="chart-insight">
+            <span class="eyebrow">Tu firma energética</span>
+            <h2 class="display" id="signatureTitle"></h2>
+            <p class="cosmic-summary" id="cosmicSummary"></p>
+            <div class="signature-row" id="signaturePills"></div>
+          </div>
+        </section>
+
+        <div class="big-three" id="bigThree"></div>
+
+        <div class="report-grid">
+          <article class="glass-card report-card full">
+            <div class="card-head"><h3>Mapa planetario</h3><span class="card-symbol">☼</span></div>
+            <div class="planet-list" id="planetList"></div>
+          </article>
+
+          <article class="glass-card report-card">
+            <div class="card-head"><h3>Claves de personalidad</h3><span class="card-symbol">✦</span></div>
+            <div class="element-bars" id="elementBars"></div>
+            <div class="personality-keys" id="personalityKeys"></div>
+          </article>
+
+          <article class="glass-card report-card">
+            <div class="card-head"><h3>Aspectos destacados</h3><span class="card-symbol">⌁</span></div>
+            <div class="aspect-list" id="aspectList"></div>
+          </article>
+
+          <article class="glass-card report-card full">
+            <div class="card-head"><h3>Tu potencial en movimiento</h3><span class="card-symbol">↑</span></div>
+            <div class="narrative-grid" id="narrativeGrid"></div>
+          </article>
+        </div>
+
+        <section class="glass-card tarot-offer" id="tarot">
+          <div class="offer-grid">
+            <div class="offer-copy">
+              <span class="eyebrow">Del mapa a la decisión</span>
+              <h2 class="display">Tu carta muestra el patrón. Tú eliges el siguiente paso.</h2>
+              <p>Una sesión privada de tarot puede ayudarte a mirar el tema que hoy pide atención, ordenar tus opciones y salir con una decisión concreta.</p>
+              <blockquote class="personal-question" id="personalQuestion"></blockquote>
+            </div>
+            <div class="price-card">
+              <span class="offer-badge">Precio de bienvenida · 50% menos</span>
+              <div class="price"><strong>US$14,99</strong><del>US$30</del></div>
+              <div class="price-note">Sesión privada de 45 minutos</div>
+              <ul class="offer-includes">
+                <li>Lectura enfocada en tu pregunta actual</li>
+                <li>3 preguntas clave durante la sesión</li>
+                <li>Cierre con un próximo paso accionable</li>
+              </ul>
+              <button class="btn btn-primary btn-wide tarot-trigger" type="button">Quiero liberar mi potencial <span class="arrow">→</span></button>
+              <p class="no-charge">No se realiza ningún cobro desde esta página. La coordinación continúa por WhatsApp.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-grid">
+      <p>Esta experiencia ofrece una interpretación astrológica orientativa para reflexión y entretenimiento. No determina tu destino ni sustituye acompañamiento médico, psicológico, legal o financiero. Las posiciones se calculan mediante efemérides simplificadas; para uso astrológico profesional se recomienda validarlas con una efeméride certificada.</p>
+      <span class="footer-mark">Alma Astral · 2026</span>
+    </div>
+  </footer>
+
+  <div class="mobile-offer" id="mobileOffer">
+    <div><small>Sesión privada · antes US$30</small><strong>US$14,99</strong></div>
+    <button class="btn btn-primary tarot-trigger" type="button">Ver promoción</button>
+  </div>
+
+  <div class="modal" id="tarotModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="glass-card modal-card">
+      <button class="modal-close" id="modalClose" type="button" aria-label="Cerrar">×</button>
+      <span class="eyebrow">Tu sesión privada</span>
+      <h2 class="display" id="modalTitle">Lleva claridad a tu siguiente decisión.</h2>
+      <p>Preparamos una solicitud con el foco de tu lectura. Puedes abrirla en WhatsApp y elegir a la tarotista con quien quieras coordinar.</p>
+      <div class="modal-question" id="modalQuestion"></div>
+      <div class="field">
+        <label for="bookingName">¿Cómo te llamamos?</label>
+        <input id="bookingName" maxlength="40" placeholder="Tu nombre">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary btn-wide" id="openWhatsApp" type="button">Continuar por WhatsApp <span class="arrow">→</span></button>
+        <button class="btn btn-ghost btn-wide" id="copyRequest" type="button">Copiar solicitud</button>
+        <div class="copy-status" id="copyStatus" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script id="appScript">
+    (() => {
+      "use strict";
+
+      const CONFIG = {
+        tarotWhatsApp: "", // Agrega el número con código de país, sin + ni espacios. Ej.: 56912345678
+        promoPrice: "US$14,99",
+        regularPrice: "US$30"
+      };
+
+      const SIGNS = [
+        { name: "Aries", glyph: "♈", element: "Fuego", modality: "Cardinal", essence: "valiente, directa y pionera", need: "movimiento y autonomía", gift: "iniciativa", shadow: "actuar antes de escuchar", love: "necesitas honestidad, deseo y espacio para ser tú", mind: "piensas rápido y dices lo esencial", action: "avanzas encendiendo la primera chispa", growth: "creces cuando te atreves a empezar" },
+        { name: "Tauro", glyph: "♉", element: "Tierra", modality: "Fijo", essence: "serena, sensorial y perseverante", need: "seguridad y ritmos sostenibles", gift: "constancia", shadow: "aferrarte a lo conocido", love: "amas construyendo confianza, presencia y estabilidad", mind: "piensas con calma y sentido práctico", action: "avanzas paso a paso, sin perder el centro", growth: "creces al reconocer tu propio valor" },
+        { name: "Géminis", glyph: "♊", element: "Aire", modality: "Mutable", essence: "curiosa, versátil y expresiva", need: "estimulación e intercambio", gift: "adaptabilidad", shadow: "dispersarte entre demasiadas opciones", love: "te vinculas a través de la conversación y la curiosidad", mind: "conectas ideas con velocidad y frescura", action: "avanzas explorando alternativas", growth: "creces cuando compartes lo que aprendes" },
+        { name: "Cáncer", glyph: "♋", element: "Agua", modality: "Cardinal", essence: "sensible, protectora e intuitiva", need: "pertenencia y refugio emocional", gift: "empatía", shadow: "protegerte antes de expresar lo que sientes", love: "necesitas ternura, seguridad y memoria compartida", mind: "piensas desde la intuición y el recuerdo", action: "avanzas cuidando lo que importa", growth: "creces cuando haces de tu sensibilidad una fuerza" },
+        { name: "Leo", glyph: "♌", element: "Fuego", modality: "Fijo", essence: "creativa, cálida y magnética", need: "expresión y reconocimiento genuino", gift: "presencia", shadow: "confundir validación con valor", love: "amas con lealtad, generosidad y corazón abierto", mind: "piensas en grande y comunicas con convicción", action: "avanzas cuando algo enciende tu orgullo creativo", growth: "creces al permitirte ocupar tu lugar" },
+        { name: "Virgo", glyph: "♍", element: "Tierra", modality: "Mutable", essence: "observadora, precisa y servicial", need: "orden, utilidad y mejora", gift: "discernimiento", shadow: "exigirte una perfección imposible", love: "demuestras amor en los detalles y la presencia confiable", mind: "analizas, editas y encuentras lo que otros pasan por alto", action: "avanzas creando método", growth: "creces al honrar el progreso, no la perfección" },
+        { name: "Libra", glyph: "♎", element: "Aire", modality: "Cardinal", essence: "diplomática, estética y relacional", need: "armonía y reciprocidad", gift: "perspectiva", shadow: "postergar tu elección para evitar conflicto", love: "buscas complicidad, belleza y acuerdos equilibrados", mind: "ves ambos lados y creas puentes", action: "avanzas mejor en alianza", growth: "creces cuando eliges sin abandonarte" },
+        { name: "Escorpio", glyph: "♏", element: "Agua", modality: "Fijo", essence: "intensa, perceptiva y magnética", need: "verdad y profundidad emocional", gift: "transformación", shadow: "controlar lo que temes perder", love: "necesitas conexión profunda, lealtad y verdad", mind: "lees entre líneas y detectas lo no dicho", action: "avanzas con deseo, estrategia y profundidad", growth: "creces al convertir la intensidad en poder consciente" },
+        { name: "Sagitario", glyph: "♐", element: "Fuego", modality: "Mutable", essence: "expansiva, franca y aventurera", need: "libertad y sentido", gift: "visión", shadow: "huir cuando algo pide permanencia", love: "necesitas crecimiento, humor y horizonte compartido", mind: "piensas en posibilidades y significado", action: "avanzas siguiendo una visión", growth: "creces al convertir experiencia en sabiduría" },
+        { name: "Capricornio", glyph: "♑", element: "Tierra", modality: "Cardinal", essence: "estratégica, responsable y ambiciosa", need: "estructura y propósito", gift: "maestría", shadow: "cargar más de lo que te corresponde", love: "buscas lealtad, madurez y un proyecto real", mind: "piensas en consecuencias, recursos y largo plazo", action: "avanzas con disciplina y objetivos", growth: "creces cuando defines el éxito en tus propios términos" },
+        { name: "Acuario", glyph: "♒", element: "Aire", modality: "Fijo", essence: "independiente, original y visionaria", need: "libertad mental y comunidad", gift: "innovación", shadow: "tomar distancia para no sentirte limitada", love: "necesitas amistad, autenticidad y aire dentro del vínculo", mind: "piensas fuera del patrón y anticipas cambios", action: "avanzas cuestionando lo establecido", growth: "creces cuando tu diferencia se vuelve contribución" },
+        { name: "Piscis", glyph: "♓", element: "Agua", modality: "Mutable", essence: "imaginativa, compasiva y receptiva", need: "inspiración y conexión", gift: "sensibilidad", shadow: "absorber emociones que no son tuyas", love: "amas con intuición, romanticismo y profunda empatía", mind: "piensas en símbolos, sensaciones e imágenes", action: "avanzas cuando algo toca tu alma", growth: "creces al poner límites a tu inmensa sensibilidad" }
+      ];
+
+      const PLANETS = [
+        { key: "sun", name: "Sol", glyph: "☉", role: "Identidad" },
+        { key: "moon", name: "Luna", glyph: "☽", role: "Mundo emocional" },
+        { key: "mercury", name: "Mercurio", glyph: "☿", role: "Mente y voz" },
+        { key: "venus", name: "Venus", glyph: "♀", role: "Amor y valor" },
+        { key: "mars", name: "Marte", glyph: "♂", role: "Deseo y acción" },
+        { key: "jupiter", name: "Júpiter", glyph: "♃", role: "Expansión" },
+        { key: "saturn", name: "Saturno", glyph: "♄", role: "Maestría" },
+        { key: "uranus", name: "Urano", glyph: "♅", role: "Cambio" },
+        { key: "neptune", name: "Neptuno", glyph: "♆", role: "Imaginación" },
+        { key: "pluto", name: "Plutón", glyph: "♇", role: "Transformación" },
+        { key: "node", name: "Nodo Norte", glyph: "☊", role: "Dirección evolutiva" }
+      ];
+
+      const CITY_DB = [
+        ["Santiago, Chile", -33.4489, -70.6693, "America/Santiago", ["santiago"]],
+        ["Valparaíso, Chile", -33.0472, -71.6127, "America/Santiago", ["valparaiso", "valpo"]],
+        ["Viña del Mar, Chile", -33.0153, -71.5500, "America/Santiago", ["vina del mar", "viña"]],
+        ["Concepción, Chile", -36.8201, -73.0444, "America/Santiago", ["concepcion"]],
+        ["Temuco, Chile", -38.7359, -72.5904, "America/Santiago", ["temuco"]],
+        ["Osorno, Chile", -40.5740, -73.1335, "America/Santiago", ["osorno"]],
+        ["Puerto Montt, Chile", -41.4689, -72.9411, "America/Santiago", ["puerto montt"]],
+        ["La Serena, Chile", -29.9027, -71.2519, "America/Santiago", ["la serena"]],
+        ["Antofagasta, Chile", -23.6509, -70.3975, "America/Santiago", ["antofagasta"]],
+        ["Punta Arenas, Chile", -53.1638, -70.9171, "America/Punta_Arenas", ["punta arenas"]],
+        ["Buenos Aires, Argentina", -34.6037, -58.3816, "America/Argentina/Buenos_Aires", ["buenos aires"]],
+        ["Lima, Perú", -12.0464, -77.0428, "America/Lima", ["lima"]],
+        ["Bogotá, Colombia", 4.7110, -74.0721, "America/Bogota", ["bogota"]],
+        ["Ciudad de México, México", 19.4326, -99.1332, "America/Mexico_City", ["ciudad de mexico", "cdmx"]],
+        ["Madrid, España", 40.4168, -3.7038, "Europe/Madrid", ["madrid"]],
+        ["Barcelona, España", 41.3874, 2.1686, "Europe/Madrid", ["barcelona"]],
+        ["Miami, Estados Unidos", 25.7617, -80.1918, "America/New_York", ["miami"]],
+        ["Nueva York, Estados Unidos", 40.7128, -74.0060, "America/New_York", ["nueva york", "new york"]]
+      ];
+
+      const ASPECTS = [
+        { name: "Conjunción", angle: 0, orb: 8, glyph: "☌", color: "#e9c886", tone: "fusiona ambas energías y las vuelve imposibles de separar" },
+        { name: "Sextil", angle: 60, orb: 5, glyph: "⚹", color: "#7dd3fc", tone: "abre una oportunidad que crece cuando tomas iniciativa" },
+        { name: "Cuadratura", angle: 90, orb: 7, glyph: "□", color: "#f08ca2", tone: "crea una tensión fértil que te empuja a desarrollar una nueva habilidad" },
+        { name: "Trígono", angle: 120, orb: 7, glyph: "△", color: "#9fe1c1", tone: "hace que estos recursos colaboren con naturalidad" },
+        { name: "Oposición", angle: 180, orb: 8, glyph: "☍", color: "#c4a6ff", tone: "te pide integrar dos necesidades que parecen contrarias" }
+      ];
+
+      const $ = (selector, root = document) => root.querySelector(selector);
+      const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+      const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+      const norm = n => ((n % 360) + 360) % 360;
+      const rad = n => n * Math.PI / 180;
+      const deg = n => n * 180 / Math.PI;
+      const sin = n => Math.sin(rad(n));
+      const cos = n => Math.cos(rad(n));
+      const atan2 = (y, x) => deg(Math.atan2(y, x));
+      const normalizeText = value => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+      const state = { reading: null, toastTimer: null };
+
+      const daySelect = $("#day");
+      for (let i = 1; i <= 31; i++) daySelect.insertAdjacentHTML("beforeend", `<option value="${i}">${i}</option>`);
+      $("#year").max = new Date().getFullYear();
+
+      function updateDays() {
+        const month = Number($("#month").value);
+        const year = Number($("#year").value) || 2000;
+        const previous = Number(daySelect.value);
+        const max = month ? new Date(year, month, 0).getDate() : 31;
+        [...daySelect.options].forEach((option, index) => { if (index) option.hidden = index > max; });
+        if (previous > max) daySelect.value = "";
+      }
+      $("#month").addEventListener("change", updateDays);
+      $("#year").addEventListener("input", updateDays);
+
+      $$('[data-scroll]').forEach(button => button.addEventListener("click", () => {
+        const target = $(button.dataset.scroll);
+        if (target) target.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      }));
+
+      addEventListener("scroll", () => $("#topbar").classList.toggle("scrolled", scrollY > 24), { passive: true });
+
+      $("#unknownTime").addEventListener("change", event => {
+        const time = $("#time");
+        time.disabled = event.target.checked;
+        time.required = !event.target.checked;
+        if (event.target.checked) time.value = "";
+      });
+
+      $("#demoBtn").addEventListener("click", () => {
+        $("#name").value = "Alma";
+        $("#day").value = "7";
+        $("#month").value = "11";
+        $("#year").value = "1997";
+        $("#time").value = "06:20";
+        $("#unknownTime").checked = false;
+        $("#time").disabled = false;
+        $("#place").value = "Osorno, Chile";
+        showToast("Ejemplo listo. Pulsa “Crear mi carta astral”.");
+      });
+
+      function showError(message) {
+        const box = $("#formError");
+        box.textContent = message;
+        box.classList.add("show");
+      }
+      function clearError() { $("#formError").classList.remove("show"); }
+
+      function validateForm(values) {
+        if (!values.day || !values.month || !values.year) return "Completa tu fecha de nacimiento.";
+        if (values.year < 1900 || values.year > new Date().getFullYear()) return "Ingresa un año válido entre 1900 y el año actual.";
+        const testDate = new Date(Date.UTC(values.year, values.month - 1, values.day));
+        if (testDate.getUTCDate() !== values.day || testDate.getUTCMonth() !== values.month - 1) return "La fecha ingresada no existe. Revísala e intenta de nuevo.";
+        if (!values.unknownTime && !values.time) return "Ingresa tu hora de nacimiento o marca que no la conoces.";
+        if (values.place.trim().length < 2) return "Ingresa tu ciudad de nacimiento.";
+        return "";
+      }
+
+      function localCity(query) {
+        const normalized = normalizeText(query);
+        const row = CITY_DB.find(city => city[4].some(alias => normalized.includes(alias)) || normalized.includes(normalizeText(city[0])));
+        return row ? { name: row[0], latitude: row[1], longitude: row[2], timezone: row[3], source: "local" } : null;
+      }
+
+      async function resolveLocation(place) {
+        const local = localCity(place);
+        if (local) return local;
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 8500);
+        try {
+          const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(place)}&count=1&language=es&format=json`;
+          const response = await fetch(url, { signal: controller.signal });
+          if (!response.ok) throw new Error("location");
+          const data = await response.json();
+          const hit = data.results && data.results[0];
+          if (!hit) throw new Error("not-found");
+          return {
+            name: [hit.name, hit.admin1, hit.country].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", "),
+            latitude: hit.latitude,
+            longitude: hit.longitude,
+            timezone: hit.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+            source: "search"
+          };
+        } catch (error) {
+          throw new Error(error.message === "not-found" ? "No encontramos esa ciudad. Prueba con “Ciudad, País”." : "No pudimos consultar esa ciudad. Revisa tu conexión o elige una de las sugerencias.");
+        } finally { clearTimeout(timer); }
+      }
+
+      function timeZoneOffset(date, timeZone) {
+        const format = new Intl.DateTimeFormat("en-US", {
+          timeZone, year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+        });
+        const parts = Object.fromEntries(format.formatToParts(date).filter(p => p.type !== "literal").map(p => [p.type, p.value]));
+        const asUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second);
+        return (asUTC - date.getTime()) / 60000;
+      }
+
+      function zonedToUtc(year, month, day, hour, minute, timeZone) {
+        const utcGuess = Date.UTC(year, month - 1, day, hour, minute, 0);
+        let date = new Date(utcGuess);
+        let offset = timeZoneOffset(date, timeZone);
+        date = new Date(utcGuess - offset * 60000);
+        const correctedOffset = timeZoneOffset(date, timeZone);
+        if (correctedOffset !== offset) date = new Date(utcGuess - correctedOffset * 60000);
+        return date;
+      }
+
+      function julianDate(date) { return date.getTime() / 86400000 + 2440587.5; }
+
+      function eccentricAnomaly(M, e) {
+        let E = M + deg(e * Math.sin(rad(M)) * (1 + e * Math.cos(rad(M))));
+        for (let i = 0; i < 5; i++) {
+          const delta = (E - deg(e * Math.sin(rad(E))) - M) / (1 - e * Math.cos(rad(E)));
+          E -= delta;
+          if (Math.abs(delta) < 0.0001) break;
+        }
+        return E;
+      }
+
+      function orbitPosition(elements) {
+        const E = eccentricAnomaly(norm(elements.M), elements.e);
+        const xv = elements.a * (cos(E) - elements.e);
+        const yv = elements.a * Math.sqrt(1 - elements.e * elements.e) * sin(E);
+        const v = atan2(yv, xv);
+        const r = Math.sqrt(xv * xv + yv * yv);
+        const vw = v + elements.w;
+        const xh = r * (cos(elements.N) * cos(vw) - sin(elements.N) * sin(vw) * cos(elements.i));
+        const yh = r * (sin(elements.N) * cos(vw) + cos(elements.N) * sin(vw) * cos(elements.i));
+        const zh = r * sin(vw) * sin(elements.i);
+        return { x: xh, y: yh, z: zh, r, lon: norm(atan2(yh, xh)), lat: atan2(zh, Math.sqrt(xh*xh + yh*yh)), M: norm(elements.M) };
+      }
+
+      function planetaryLongitudes(date) {
+        const jd = julianDate(date);
+        const d = jd - 2451543.5;
+        const sunEl = { N: 0, i: 0, w: 282.9404 + 4.70935e-5*d, a: 1, e: .016709 - 1.151e-9*d, M: 356.0470 + .9856002585*d };
+        const sunOrbit = orbitPosition(sunEl);
+        const sunLon = norm(sunOrbit.lon);
+        const xs = sunOrbit.x, ys = sunOrbit.y;
+
+        const elements = {
+          mercury: { N: 48.3313 + 3.24587e-5*d, i: 7.0047 + 5.0e-8*d, w: 29.1241 + 1.01444e-5*d, a: .387098, e: .205635 + 5.59e-10*d, M: 168.6562 + 4.0923344368*d },
+          venus: { N: 76.6799 + 2.46590e-5*d, i: 3.3946 + 2.75e-8*d, w: 54.8910 + 1.38374e-5*d, a: .723330, e: .006773 - 1.302e-9*d, M: 48.0052 + 1.6021302244*d },
+          mars: { N: 49.5574 + 2.11081e-5*d, i: 1.8497 - 1.78e-8*d, w: 286.5016 + 2.92961e-5*d, a: 1.523688, e: .093405 + 2.516e-9*d, M: 18.6021 + .5240207766*d },
+          jupiter: { N: 100.4542 + 2.76854e-5*d, i: 1.3030 - 1.557e-7*d, w: 273.8777 + 1.64505e-5*d, a: 5.20256, e: .048498 + 4.469e-9*d, M: 19.8950 + .0830853001*d },
+          saturn: { N: 113.6634 + 2.38980e-5*d, i: 2.4886 - 1.081e-7*d, w: 339.3939 + 2.97661e-5*d, a: 9.55475, e: .055546 - 9.499e-9*d, M: 316.9670 + .0334442282*d },
+          uranus: { N: 74.0005 + 1.3978e-5*d, i: .7733 + 1.9e-8*d, w: 96.6612 + 3.0565e-5*d, a: 19.18171 - 1.55e-8*d, e: .047318 + 7.45e-9*d, M: 142.5905 + .011725806*d },
+          neptune: { N: 131.7806 + 3.0173e-5*d, i: 1.7700 - 2.55e-7*d, w: 272.8461 - 6.027e-6*d, a: 30.05826 + 3.313e-8*d, e: .008606 + 2.15e-9*d, M: 260.2471 + .005995147*d }
+        };
+
+        const result = { sun: sunLon };
+        const heliocentric = {};
+        Object.entries(elements).forEach(([key, el]) => {
+          heliocentric[key] = orbitPosition(el);
+          result[key] = norm(atan2(heliocentric[key].y + ys, heliocentric[key].x + xs));
+        });
+
+        const Mj = heliocentric.jupiter.M, Ms = heliocentric.saturn.M, Mu = heliocentric.uranus.M;
+        result.jupiter = norm(result.jupiter - .332*sin(2*Mj - 5*Ms - 67.6) - .056*sin(2*Mj - 2*Ms + 21) + .042*sin(3*Mj - 5*Ms + 21) - .036*sin(Mj - 2*Ms) + .022*cos(Mj - Ms) + .023*sin(2*Mj - 3*Ms + 52) - .016*sin(Mj - 5*Ms - 69));
+        result.saturn = norm(result.saturn + .812*sin(2*Mj - 5*Ms - 67.6) - .229*cos(2*Mj - 4*Ms - 2) + .119*sin(Mj - 2*Ms - 3) + .046*sin(2*Mj - 6*Ms - 69) + .014*sin(Mj - 3*Ms + 32));
+        result.uranus = norm(result.uranus + .040*sin(Ms - 2*Mu + 6) + .035*sin(Ms - 3*Mu + 33) - .015*sin(Mj - Mu + 20));
+
+        const moonEl = { N: 125.1228 - .0529538083*d, i: 5.1454, w: 318.0634 + .1643573223*d, a: 60.2666, e: .054900, M: 115.3654 + 13.0649929509*d };
+        const moon = orbitPosition(moonEl);
+        const Lm = norm(moonEl.N + moonEl.w + moonEl.M), Ls = norm(sunEl.w + sunEl.M), D = norm(Lm - Ls), F = norm(Lm - moonEl.N), Mm = norm(moonEl.M), Msolar = norm(sunEl.M);
+        const moonCorr = -1.274*sin(Mm - 2*D) + .658*sin(2*D) - .186*sin(Msolar) - .059*sin(2*Mm - 2*D) - .057*sin(Mm - 2*D + Msolar) + .053*sin(Mm + 2*D) + .046*sin(2*D - Msolar) + .041*sin(Mm - Msolar) - .035*sin(D) - .031*sin(Mm + Msolar) - .015*sin(2*F - 2*D) + .011*sin(Mm - 4*D);
+        result.moon = norm(moon.lon + moonCorr);
+        result.node = norm(moonEl.N);
+
+        const S = 50.03 + .033459652*d, P = 238.95 + .003968789*d;
+        result.pluto = norm(238.9508 + .00400703*d - 19.799*sin(P) + 19.848*cos(P) + .897*sin(2*P) - 4.956*cos(2*P) + .610*sin(3*P) + 1.211*cos(3*P) - .341*sin(4*P) - .190*cos(4*P) + .128*sin(5*P) - .034*cos(5*P) - .038*sin(6*P) + .031*cos(6*P) + .020*sin(S-P) - .010*cos(S-P));
+        return result;
+      }
+
+      function ascendantLongitude(date, latitude, longitude) {
+        const jd = julianDate(date);
+        const T = (jd - 2451545.0) / 36525;
+        const gmst = norm(280.46061837 + 360.98564736629 * (jd - 2451545.0) + .000387933*T*T - T*T*T/38710000);
+        const lst = norm(gmst + longitude);
+        const epsilon = 23.439291 - .0130042*T;
+        let asc = norm(atan2(-cos(lst), sin(lst)*cos(epsilon) + Math.tan(rad(latitude))*sin(epsilon)));
+        const targetHalf = norm(lst + 90);
+        if (Math.abs(norm(asc - targetHalf)) > 180) asc = norm(asc + 180);
+        return asc;
+      }
+
+      function signAt(longitude) { return SIGNS[Math.floor(norm(longitude) / 30)]; }
+      function degreeInSign(longitude) {
+        const value = norm(longitude) % 30;
+        const degree = Math.floor(value);
+        const minute = Math.round((value - degree) * 60);
+        return minute === 60 ? { degree: degree + 1, minute: 0 } : { degree, minute };
+      }
+      function formatPosition(longitude) {
+        const s = signAt(longitude), d = degreeInSign(longitude);
+        return `${s.name} · ${d.degree}°${String(d.minute).padStart(2,"0")}′`;
+      }
+
+      function calculateAspects(positions) {
+        const keys = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"];
+        const found = [];
+        for (let i = 0; i < keys.length; i++) for (let j = i + 1; j < keys.length; j++) {
+          const diffRaw = Math.abs(positions[keys[i]] - positions[keys[j]]);
+          const diff = Math.min(diffRaw, 360 - diffRaw);
+          ASPECTS.forEach(aspect => {
+            const orb = Math.abs(diff - aspect.angle);
+            if (orb <= aspect.orb) found.push({ a: keys[i], b: keys[j], ...aspect, exactOrb: orb });
+          });
+        }
+        return found.sort((a,b) => (a.exactOrb / a.orb) - (b.exactOrb / b.orb));
+      }
+
+      function makeReading(values, location, utcDate) {
+        const positions = planetaryLongitudes(utcDate);
+        const ascendant = values.unknownTime ? null : ascendantLongitude(utcDate, location.latitude, location.longitude);
+        const aspects = calculateAspects(positions);
+        const elementScore = { Fuego: 0, Tierra: 0, Aire: 0, Agua: 0 };
+        const weights = { sun: 3, moon: 3, mercury: 1.5, venus: 1.5, mars: 1.5, jupiter: 1, saturn: 1 };
+        Object.entries(weights).forEach(([key, weight]) => elementScore[signAt(positions[key]).element] += weight);
+        if (ascendant != null) elementScore[signAt(ascendant).element] += 2.5;
+        const total = Object.values(elementScore).reduce((a,b) => a+b, 0);
+        Object.keys(elementScore).forEach(key => elementScore[key] = Math.round(elementScore[key] / total * 100));
+        const difference = 100 - Object.values(elementScore).reduce((a,b) => a+b, 0);
+        const dominantKey = Object.keys(elementScore).sort((a,b) => elementScore[b] - elementScore[a])[0];
+        elementScore[dominantKey] += difference;
+        const sun = signAt(positions.sun), moon = signAt(positions.moon), asc = ascendant == null ? null : signAt(ascendant);
+        const questions = {
+          Fuego: `¿Qué deseo puedes convertir en una decisión valiente, sin volver a postergarlo?`,
+          Tierra: `¿Qué estructura necesitas crear para que tu potencial deje de ser una idea y se vuelva realidad?`,
+          Aire: `¿Qué conversación o elección podría abrir el camino que hoy no alcanzas a ver?`,
+          Agua: `¿Qué emoción pide ser escuchada para dejar de dirigir tus decisiones desde la sombra?`
+        };
+        return { ...values, location, utcDate, positions, ascendant, aspects, elementScore, dominantElement: dominantKey, sun, moon, asc, question: questions[dominantKey] };
+      }
+
+      function planetByKey(key) { return PLANETS.find(p => p.key === key); }
+
+      function planetSentence(key, sign) {
+        const sentences = {
+          sun: `Tu identidad se expresa de forma ${sign.essence}; tu centro se fortalece cuando eliges ${sign.need}.`,
+          moon: `Procesas lo que sientes buscando ${sign.need}. Emocionalmente, tu gran recurso es la ${sign.gift}.`,
+          mercury: `Tu mente ${sign.mind}; cuida la tendencia a ${sign.shadow}.`,
+          venus: `${sign.love}. En tus vínculos, tu aprendizaje es no ${sign.shadow}.`,
+          mars: `Tu deseo ${sign.action}. Recuperas energía cuando actúas desde la ${sign.gift}.`,
+          jupiter: `La vida se expande cuando ${sign.growth}; ahí aparecen oportunidades y confianza.`,
+          saturn: `Tu maestría se construye al trabajar conscientemente la tendencia a ${sign.shadow}.`,
+          uranus: `Tu forma de romper moldes nace de la ${sign.gift} y de una relación libre con ${sign.need}.`,
+          neptune: `Tu imaginación se nutre de ${sign.need}; necesitas límites claros para no ${sign.shadow}.`,
+          pluto: `Tus grandes transformaciones ocurren cuando conviertes ${sign.shadow} en ${sign.gift}.`,
+          node: `Tu dirección evolutiva te invita a ${sign.growth} y a confiar más en tu ${sign.gift}.`
+        };
+        return sentences[key];
+      }
+
+      function aspectSentence(aspect) {
+        const pa = planetByKey(aspect.a), pb = planetByKey(aspect.b);
+        const themes = {
+          sun: "identidad", moon: "sensibilidad", mercury: "forma de pensar", venus: "manera de vincularte", mars: "voluntad", jupiter: "confianza", saturn: "disciplina", uranus: "necesidad de libertad", neptune: "intuición", pluto: "poder de transformación"
+        };
+        return `Tu ${themes[aspect.a]} y tu ${themes[aspect.b]} se encuentran de una forma que ${aspect.tone}.`;
+      }
+
+      function escapeHTML(value) {
+        return String(value).replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+      }
+
+      function renderReading(reading) {
+        state.reading = reading;
+        document.body.classList.add("has-results");
+        const givenName = reading.name.trim() || "Tu";
+        $("#resultTitle").textContent = reading.name.trim() ? `Carta de ${reading.name.trim()}` : "Tu carta astral";
+        const localDate = new Date(Date.UTC(reading.year, reading.month - 1, reading.day));
+        const dateLabel = new Intl.DateTimeFormat("es-CL", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(localDate);
+        const timeLabel = reading.unknownTime ? "hora desconocida" : `${reading.time} h`;
+        $("#resultMeta").textContent = `${dateLabel} · ${timeLabel} · ${reading.location.name}`;
+
+        const ascText = reading.asc ? reading.asc.name : "Ascendente pendiente";
+        $("#signatureTitle").textContent = `${reading.sun.name} ☼ · ${reading.moon.name} ☽ · ${ascText} ↑`;
+        $("#cosmicSummary").textContent = reading.asc
+          ? `${givenName === "Tu" ? "Tu energía es" : `${givenName}, tu energía es`} ${reading.sun.essence}; por dentro buscas ${reading.moon.need}, y el mundo te percibe con la cualidad ${reading.asc.essence}.`
+          : `${givenName === "Tu" ? "Tu energía es" : `${givenName}, tu energía es`} ${reading.sun.essence}; por dentro buscas ${reading.moon.need}. Con la hora exacta podremos revelar también tu ascendente.`;
+        $("#signaturePills").innerHTML = [
+          `${SIGNS.find(s => s.element === reading.dominantElement)?.glyph || "✦"} Elemento dominante: ${reading.dominantElement}`,
+          `☉ Don: ${reading.sun.gift}`,
+          `☽ Necesidad: ${reading.moon.need}`
+        ].map(x => `<span class="signature-pill">${escapeHTML(x)}</span>`).join("");
+
+        const pillars = [
+          { label: "Sol · Tu esencia", glyph: "☉", sign: reading.sun, lon: reading.positions.sun, copy: `Brillas cuando expresas tu ${reading.sun.gift} y das espacio a una presencia ${reading.sun.essence}.` },
+          { label: "Luna · Tu mundo interior", glyph: "☽", sign: reading.moon, lon: reading.positions.moon, copy: `Para sentir equilibrio necesitas ${reading.moon.need}; tu emoción se protege al ${reading.moon.shadow}.` },
+          reading.asc ? { label: "Ascendente · Tu camino", glyph: "↑", sign: reading.asc, lon: reading.ascendant, copy: `Tu forma de entrar en la vida es ${reading.asc.essence}; el crecimiento llega al abrazar tu ${reading.asc.gift}.` }
+            : { label: "Ascendente", glyph: "↑", sign: { name: "Hora requerida" }, lon: null, copy: "Ingresa una hora de nacimiento exacta para revelar cómo te proyectas y cómo comienzan tus casas." }
+        ];
+        $("#bigThree").innerHTML = pillars.map(p => `<article class="glass-card pillar" data-glyph="${p.glyph}"><span class="pillar-label">${p.label}</span><h3>${p.lon == null ? p.sign.name : `${p.sign.glyph} ${p.sign.name}`}</h3><div class="pillar-degree">${p.lon == null ? "Lectura parcial" : formatPosition(p.lon)}</div><p>${p.copy}</p></article>`).join("");
+
+        $("#planetList").innerHTML = PLANETS.map(planet => {
+          const longitude = reading.positions[planet.key];
+          const sign = signAt(longitude);
+          return `<div class="planet-row"><span class="planet-glyph">${planet.glyph}</span><span class="planet-name">${planet.name} en ${sign.name}<small>${planetSentence(planet.key, sign)}</small></span><span class="planet-pos">${formatPosition(longitude).split(" · ")[1]}</span></div>`;
+        }).join("");
+
+        const elements = [
+          ["Fuego", "Impulso"], ["Tierra", "Materialización"], ["Aire", "Ideas"], ["Agua", "Intuición"]
+        ];
+        $("#elementBars").innerHTML = elements.map(([element, label]) => `<div><div class="bar-label"><span>${element} · ${label}</span><span>${reading.elementScore[element]}%</span></div><div class="bar-track"><div class="bar-fill" data-width="${reading.elementScore[element]}%"></div></div></div>`).join("");
+        requestAnimationFrame(() => $$(".bar-fill", $("#elementBars")).forEach(bar => bar.style.width = bar.dataset.width));
+        const keys = [...new Set([reading.sun.gift, reading.moon.gift, reading.asc?.gift, signAt(reading.positions.mercury).gift, signAt(reading.positions.venus).gift, signAt(reading.positions.mars).gift].filter(Boolean))];
+        $("#personalityKeys").innerHTML = keys.map(key => `<span class="personality-key">✦ ${key[0].toUpperCase() + key.slice(1)}</span>`).join("");
+
+        const topAspects = reading.aspects.slice(0, 5);
+        $("#aspectList").innerHTML = topAspects.length ? topAspects.map(aspect => {
+          const a = planetByKey(aspect.a), b = planetByKey(aspect.b);
+          return `<div class="aspect-item"><span class="aspect-icon">${aspect.glyph}</span><div><strong>${a.name} ${aspect.name.toLowerCase()} ${b.name} · orbe ${aspect.exactOrb.toFixed(1)}°</strong><p>${aspectSentence(aspect)}</p></div></div>`;
+        }).join("") : `<p class="section-copy">Tu carta distribuye sus energías sin aspectos mayores extremadamente cerrados. Esto sugiere una expresión interna menos polarizada.</p>`;
+
+        const mercury = signAt(reading.positions.mercury), venus = signAt(reading.positions.venus), mars = signAt(reading.positions.mars), jupiter = signAt(reading.positions.jupiter), saturn = signAt(reading.positions.saturn), node = signAt(reading.positions.node);
+        const narratives = [
+          { icon: "◇", title: "Vocación y talento", copy: `Tu Sol en ${reading.sun.name} aporta ${reading.sun.gift}; Mercurio en ${mercury.name} te permite aportar valor porque ${mercury.mind}. El potencial aparece cuando dejas de ${reading.sun.shadow}.` },
+          { icon: "♡", title: "Amor y vínculos", copy: `Venus en ${venus.name}: ${venus.love}. Marte en ${mars.name} suma una forma de deseo que ${mars.action}. La clave es pedir lo que necesitas antes de retirarte o adaptarte de más.` },
+          { icon: "↑", title: "Crecimiento", copy: `Júpiter en ${jupiter.name} expande tu vida cuando ${jupiter.growth}. Saturno en ${saturn.name} te enseña a no ${saturn.shadow}; tu Nodo Norte en ${node.name} confirma que ${node.growth}.` }
+        ];
+        $("#narrativeGrid").innerHTML = narratives.map(n => `<div class="narrative"><span class="n-icon">${n.icon}</span><h4>${n.title}</h4><p>${n.copy}</p></div>`).join("");
+
+        $("#personalQuestion").textContent = `“${reading.question}”`;
+        $("#modalQuestion").textContent = reading.question;
+        $("#bookingName").value = reading.name.trim();
+        drawNatalChart($("#natalChart"), reading);
+        $("#resultado").classList.add("show");
+        setTimeout(() => $("#resultado").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }), 120);
+      }
+
+      $("#birthForm").addEventListener("submit", async event => {
+        event.preventDefault();
+        clearError();
+        const values = {
+          name: $("#name").value,
+          day: Number($("#day").value), month: Number($("#month").value), year: Number($("#year").value),
+          time: $("#time").value, unknownTime: $("#unknownTime").checked, place: $("#place").value
+        };
+        const invalid = validateForm(values);
+        if (invalid) { showError(invalid); return; }
+        const loader = $("#loadingLayer");
+        loader.classList.add("show");
+        $("#generateBtn").disabled = true;
+        try {
+          $("#loadingTitle").textContent = "Encontrando tu lugar…";
+          $("#loadingText").textContent = "Ubicamos tu ciudad en el mapa celeste.";
+          const location = await resolveLocation(values.place);
+          $("#loadingTitle").textContent = "Trazando tu cielo…";
+          $("#loadingText").textContent = "Calculamos planetas, ascendente y aspectos.";
+          const [hour, minute] = values.unknownTime ? [12, 0] : values.time.split(":").map(Number);
+          const utcDate = zonedToUtc(values.year, values.month, values.day, hour, minute, location.timezone);
+          await new Promise(resolve => setTimeout(resolve, 900));
+          renderReading(makeReading(values, location, utcDate));
+        } catch (error) {
+          showError(error.message || "No pudimos crear la lectura. Revisa tus datos e intenta de nuevo.");
+        } finally {
+          loader.classList.remove("show");
+          $("#generateBtn").disabled = false;
+        }
+      });
+
+      function canvasSetup(canvas, cssSize) {
+        const dpr = Math.min(devicePixelRatio || 1, 2);
+        const width = cssSize || canvas.clientWidth || 500;
+        const height = cssSize || canvas.clientHeight || width;
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx, width, height, dpr };
+      }
+
+      function chartAngle(longitude, ascendant) { return Math.PI - rad(norm(longitude - ascendant)); }
+
+      function drawNatalChart(canvas, reading) {
+        const size = Math.max(300, Math.min(canvas.parentElement?.clientWidth || 520, 620));
+        const { ctx, width, height } = canvasSetup(canvas, size);
+        const cx = width/2, cy = height/2, R = width * .455;
+        const asc = reading.ascendant == null ? Math.floor(reading.positions.sun / 30) * 30 : reading.ascendant;
+        ctx.clearRect(0,0,width,height);
+        const glow = ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+        glow.addColorStop(0,"rgba(24,22,58,.55)"); glow.addColorStop(.68,"rgba(10,11,31,.28)"); glow.addColorStop(1,"rgba(233,200,134,.02)");
+        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fill();
+        [1,.82,.63,.30].forEach((scale,index) => { ctx.beginPath(); ctx.arc(cx,cy,R*scale,0,Math.PI*2); ctx.strokeStyle = index === 0 ? "rgba(233,200,134,.65)" : "rgba(233,200,134,.20)"; ctx.lineWidth = index === 0 ? 1.2 : .8; ctx.stroke(); });
+
+        ctx.save(); ctx.translate(cx,cy);
+        for (let i=0;i<12;i++) {
+          const boundary = i*30;
+          const a = chartAngle(boundary,asc);
+          ctx.beginPath(); ctx.moveTo(Math.cos(a)*R*.63, Math.sin(a)*R*.63); ctx.lineTo(Math.cos(a)*R, Math.sin(a)*R); ctx.strokeStyle="rgba(233,200,134,.22)"; ctx.lineWidth=.7; ctx.stroke();
+          const mid = chartAngle(boundary+15,asc);
+          ctx.fillStyle = "#d9bc82"; ctx.font = `${Math.max(15,width*.035)}px Georgia, serif`; ctx.textAlign="center"; ctx.textBaseline="middle";
+          ctx.fillText(SIGNS[i].glyph, Math.cos(mid)*R*.91, Math.sin(mid)*R*.91);
+        }
+
+        for (let house=0;house<12;house++) {
+          const a = Math.PI - rad(house*30);
+          ctx.beginPath(); ctx.moveTo(Math.cos(a)*R*.3,Math.sin(a)*R*.3); ctx.lineTo(Math.cos(a)*R*.63,Math.sin(a)*R*.63); ctx.strokeStyle="rgba(255,255,255,.08)"; ctx.stroke();
+          const mid = Math.PI - rad(house*30+15);
+          ctx.fillStyle="rgba(255,255,255,.38)"; ctx.font=`${Math.max(8,width*.018)}px Manrope, sans-serif`;
+          ctx.fillText(String(house+1),Math.cos(mid)*R*.36,Math.sin(mid)*R*.36);
+        }
+
+        reading.aspects.slice(0,16).forEach(aspect => {
+          const a = chartAngle(reading.positions[aspect.a],asc), b = chartAngle(reading.positions[aspect.b],asc);
+          ctx.beginPath(); ctx.moveTo(Math.cos(a)*R*.54,Math.sin(a)*R*.54); ctx.lineTo(Math.cos(b)*R*.54,Math.sin(b)*R*.54);
+          ctx.strokeStyle = aspect.color + "62"; ctx.lineWidth = aspect.name === "Cuadratura" || aspect.name === "Oposición" ? 1.2 : .8; ctx.stroke();
+        });
+
+        const shown = PLANETS.filter(p => p.key !== "node");
+        const occupied = [];
+        shown.forEach((planet,index) => {
+          const longitude = reading.positions[planet.key];
+          let a = chartAngle(longitude,asc);
+          let radius = R*.72;
+          occupied.forEach(previous => { if (Math.abs(Math.atan2(Math.sin(a-previous.a),Math.cos(a-previous.a))) < .09) radius -= R*.085; });
+          occupied.push({a,radius});
+          const x=Math.cos(a)*radius, y=Math.sin(a)*radius;
+          ctx.beginPath(); ctx.arc(x,y,Math.max(11,width*.026),0,Math.PI*2); ctx.fillStyle="rgba(10,11,31,.92)"; ctx.fill(); ctx.strokeStyle="rgba(233,200,134,.46)"; ctx.lineWidth=1; ctx.stroke();
+          ctx.fillStyle = index < 2 ? "#f3d89c" : "#e9e2ed"; ctx.font = `${Math.max(13,width*.03)}px Georgia, serif`; ctx.fillText(planet.glyph,x,y+1);
+        });
+
+        if (reading.ascendant != null) {
+          const a = Math.PI;
+          ctx.strokeStyle="#f3d89c"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(Math.cos(a)*R*.27,0); ctx.lineTo(Math.cos(a)*R,0); ctx.stroke();
+          ctx.fillStyle="#f3d89c"; ctx.font=`700 ${Math.max(8,width*.018)}px Manrope, sans-serif`; ctx.textAlign="left"; ctx.fillText("ASC",-R*.57,-8);
+        }
+        ctx.fillStyle="rgba(233,200,134,.8)"; ctx.font=`${Math.max(20,width*.055)}px Georgia, serif`; ctx.textAlign="center"; ctx.fillText("✦",0,2);
+        ctx.restore();
+      }
+
+      function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 10) {
+        const words = text.split(/\s+/); let line = "", lines = [];
+        words.forEach(word => { const test = line ? `${line} ${word}` : word; if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line=word; } else line=test; });
+        if (line) lines.push(line);
+        lines = lines.slice(0,maxLines);
+        lines.forEach((item,index) => ctx.fillText(item,x,y+index*lineHeight));
+        return y+lines.length*lineHeight;
+      }
+
+      function roundRect(ctx,x,y,w,h,r) {
+        const radius=Math.min(r,w/2,h/2); ctx.beginPath(); ctx.moveTo(x+radius,y); ctx.arcTo(x+w,y,x+w,y+h,radius); ctx.arcTo(x+w,y+h,x,y+h,radius); ctx.arcTo(x,y+h,x,y,radius); ctx.arcTo(x,y,x+w,y,radius); ctx.closePath();
+      }
+
+      function drawDownloadCard(reading) {
+        const canvas=document.createElement("canvas"); canvas.width=1080; canvas.height=1350; const ctx=canvas.getContext("2d");
+        const bg=ctx.createLinearGradient(0,0,1080,1350); bg.addColorStop(0,"#080a1d"); bg.addColorStop(.52,"#11102c"); bg.addColorStop(1,"#070817"); ctx.fillStyle=bg; ctx.fillRect(0,0,1080,1350);
+        const nebula=ctx.createRadialGradient(900,240,10,900,240,480); nebula.addColorStop(0,"rgba(114,72,175,.35)"); nebula.addColorStop(1,"rgba(114,72,175,0)"); ctx.fillStyle=nebula; ctx.fillRect(0,0,1080,780);
+        let seed = reading.year*10000+reading.month*100+reading.day;
+        const random=()=>{seed=(seed*9301+49297)%233280;return seed/233280;};
+        for(let i=0;i<210;i++){const x=random()*1080,y=random()*1350,r=random()*1.6+.3;ctx.fillStyle=random()>.8?"rgba(239,205,137,.75)":"rgba(255,255,255,.55)";ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+        ctx.strokeStyle="rgba(233,200,134,.52)";ctx.lineWidth=2;roundRect(ctx,34,34,1012,1282,28);ctx.stroke();
+        ctx.fillStyle="#e9c886";ctx.textAlign="center";ctx.font="500 78px Georgia, serif";ctx.fillText("CARTA ASTRAL",540,120);
+        ctx.fillStyle="#bdb6c7";ctx.font="24px Manrope, Arial";
+        const dateLabel=new Intl.DateTimeFormat("es-CL",{day:"numeric",month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(Date.UTC(reading.year,reading.month-1,reading.day)));
+        ctx.fillText(`${reading.name.trim() || "Tu mapa natal"}  ·  ${dateLabel}  ·  ${reading.location.name}`,540,161);
+        const pillars=[{l:"SOL",g:"☉",s:reading.sun,lon:reading.positions.sun},{l:"LUNA",g:"☽",s:reading.moon,lon:reading.positions.moon},{l:"ASCENDENTE",g:"↑",s:reading.asc,lon:reading.ascendant}];
+        pillars.forEach((p,i)=>{const x=58+i*327;ctx.fillStyle="rgba(11,12,34,.72)";roundRect(ctx,x,196,305,164,18);ctx.fill();ctx.strokeStyle="rgba(233,200,134,.38)";ctx.stroke();ctx.fillStyle="#e9c886";ctx.font="700 17px Manrope, Arial";ctx.fillText(p.l,x+152,228);ctx.fillStyle="#f7efe4";ctx.font="44px Georgia, serif";ctx.fillText(p.s?`${p.g} ${p.s.name}`:"Hora requerida",x+152,288);ctx.fillStyle="#aaa2b3";ctx.font="18px Manrope, Arial";ctx.fillText(p.lon==null?"Lectura parcial":formatPosition(p.lon).split(" · ")[1],x+152,326);});
+        const chart=document.createElement("canvas");chart.style.width="460px";chart.style.height="460px";document.body.appendChild(chart);drawNatalChart(chart,reading);ctx.drawImage(chart,50,405,500,500);chart.remove();
+        ctx.textAlign="left";ctx.fillStyle="#e9c886";ctx.font="600 30px Georgia, serif";ctx.fillText("PLANETAS",596,434);
+        ctx.font="23px Georgia, serif";
+        PLANETS.slice(2).forEach((p,i)=>{const y=475+i*43,s=signAt(reading.positions[p.key]);ctx.fillStyle="#e9c886";ctx.fillText(p.glyph,596,y);ctx.fillStyle="#eee7ef";ctx.fillText(`${p.name} en ${s.name}`,632,y);ctx.fillStyle="#9f98a9";ctx.font="17px Manrope, Arial";ctx.textAlign="right";ctx.fillText(formatPosition(reading.positions[p.key]).split(" · ")[1],1004,y);ctx.textAlign="left";ctx.font="23px Georgia, serif";});
+        ctx.fillStyle="rgba(13,14,39,.78)";roundRect(ctx,58,934,964,284,22);ctx.fill();ctx.strokeStyle="rgba(233,200,134,.36)";ctx.stroke();
+        ctx.textAlign="center";ctx.fillStyle="#e9c886";ctx.font="600 27px Manrope, Arial";ctx.fillText("TU FIRMA ENERGÉTICA",540,982);
+        ctx.fillStyle="#f6eee6";ctx.font="italic 36px Georgia, serif";
+        const summary=`${reading.sun.essence.charAt(0).toUpperCase()+reading.sun.essence.slice(1)}; emocionalmente buscas ${reading.moon.need}. Tu gran don es la ${reading.sun.gift} y tu elemento dominante es ${reading.dominantElement}.`;
+        wrapText(ctx,summary,540,1040,820,48,3);
+        ctx.fillStyle="#a9a2b1";ctx.font="20px Manrope, Arial";wrapText(ctx,reading.question,540,1167,820,30,2);
+        ctx.fillStyle="#e9c886";ctx.font="500 24px Georgia, serif";ctx.fillText(`${reading.sun.name} ☼  ·  ${reading.moon.name} ☽  ·  ${reading.asc?reading.asc.name:"—"} ↑`,540,1265);
+        return canvas;
+      }
+
+      $("#downloadChart").addEventListener("click", async () => {
+        if (!state.reading) return;
+        showToast("Preparando tu infografía…");
+        if (document.fonts?.ready) await document.fonts.ready;
+        const canvas=drawDownloadCard(state.reading);
+        const link=document.createElement("a");
+        const safe=(state.reading.name.trim()||"mi-carta").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]+/g,"-").replace(/^-|-$/g,"").toLowerCase();
+        link.download=`carta-astral-${safe}.png`; link.href=canvas.toDataURL("image/png"); link.click();
+        showToast("Infografía descargada ✦");
+      });
+
+      function readingSummary(reading) {
+        return `${reading.name.trim() ? `${reading.name.trim()}: ` : ""}Sol en ${reading.sun.name}, Luna en ${reading.moon.name}${reading.asc ? ` y Ascendente en ${reading.asc.name}` : ""}. Energía ${reading.sun.essence}; emocionalmente necesitas ${reading.moon.need}. Tu don central es la ${reading.sun.gift} y tu elemento dominante es ${reading.dominantElement}. Pregunta guía: ${reading.question}`;
+      }
+
+      async function copyText(text) {
+        try { await navigator.clipboard.writeText(text); return true; }
+        catch { const area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();const ok=document.execCommand("copy");area.remove();return ok; }
+      }
+
+      $("#copySummary").addEventListener("click", async () => {
+        if (!state.reading) return;
+        const ok=await copyText(readingSummary(state.reading)); showToast(ok ? "Resumen copiado ✦" : "No se pudo copiar el resumen.");
+      });
+
+      function bookingMessage() {
+        const reading=state.reading;
+        const name=$("#bookingName").value.trim() || reading?.name.trim() || "Hola";
+        return `${name === "Hola" ? "Hola" : `Hola, soy ${name}`}. Quiero reservar la sesión privada de tarot de ${CONFIG.promoPrice} (precio regular ${CONFIG.regularPrice}). Mi lectura astral sugiere trabajar esta pregunta: “${reading?.question || "¿Cuál es mi siguiente paso?"}”. ¿Qué horarios tienen disponibles?`;
+      }
+
+      function openModal() { $("#tarotModal").classList.add("show"); document.body.style.overflow="hidden"; setTimeout(()=>$("#bookingName").focus(),50); }
+      function closeModal() { $("#tarotModal").classList.remove("show"); document.body.style.overflow=""; }
+      $$(".tarot-trigger").forEach(button=>button.addEventListener("click",openModal));
+      $("#modalClose").addEventListener("click",closeModal);
+      $("#tarotModal").addEventListener("click",event=>{if(event.target===$("#tarotModal"))closeModal();});
+      addEventListener("keydown",event=>{if(event.key==="Escape")closeModal();});
+      $("#openWhatsApp").addEventListener("click",()=>{
+        const destination=CONFIG.tarotWhatsApp ? `https://wa.me/${CONFIG.tarotWhatsApp}` : "https://wa.me/";
+        window.open(`${destination}?text=${encodeURIComponent(bookingMessage())}`,"_blank","noopener,noreferrer");
+      });
+      $("#copyRequest").addEventListener("click",async()=>{
+        const ok=await copyText(bookingMessage());$("#copyStatus").textContent=ok?"Solicitud copiada. Ya puedes enviarla a tu tarotista.":"No pudimos copiarla; selecciona el texto manualmente.";
+      });
+
+      function showToast(message) {
+        const toast=$("#toast"); toast.textContent=message; toast.classList.add("show"); clearTimeout(state.toastTimer); state.toastTimer=setTimeout(()=>toast.classList.remove("show"),2600);
+      }
+
+      let resizeTimer;
+      addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(state.reading)drawNatalChart($("#natalChart"),state.reading);},180);},{passive:true});
+    })();
+  </script>
+
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js" } }
+  </script>
+  <script type="module">
+    import * as THREE from "three";
+    const canvas = document.getElementById("cosmos");
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    try {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, .1, 100);
+      camera.position.set(0, 0, 7.5);
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: innerWidth > 700, powerPreference: "high-performance" });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+      const universe = new THREE.Group();
+      scene.add(universe);
+      const starCount = innerWidth < 700 ? 700 : 1450;
+      const positions = new Float32Array(starCount * 3);
+      const colors = new Float32Array(starCount * 3);
+      const palette = [new THREE.Color("#ffffff"), new THREE.Color("#f3d89c"), new THREE.Color("#aa9cff"), new THREE.Color("#7dd3fc")];
+      for (let i = 0; i < starCount; i++) {
+        const r = 8 + Math.random() * 21;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        positions[i*3] = r * Math.sin(phi) * Math.cos(theta);
+        positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+        positions[i*3+2] = r * Math.cos(phi) - 5;
+        const c = palette[Math.floor(Math.random() * palette.length)];
+        colors[i*3] = c.r; colors[i*3+1] = c.g; colors[i*3+2] = c.b;
+      }
+      const starGeometry = new THREE.BufferGeometry();
+      starGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      starGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+      const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ size: .032, sizeAttenuation: true, transparent: true, opacity: .82, vertexColors: true, depthWrite: false }));
+      universe.add(stars);
+
+      const celestial = new THREE.Group();
+      celestial.position.set(innerWidth < 760 ? 2.25 : 3.8, .35, -1.4);
+      universe.add(celestial);
+      [2.35, 2.75, 3.2].forEach((radius, index) => {
+        const curve = new THREE.EllipseCurve(0,0,radius,radius * (.52 + index*.06),0,Math.PI*2,false,index*.45);
+        const points = curve.getPoints(180).map(p=>new THREE.Vector3(p.x,p.y,0));
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.LineLoop(geometry,new THREE.LineBasicMaterial({color:index===1?0x8d78c7:0xe9c886,transparent:true,opacity:.12}));
+        line.rotation.x = .52 + index*.22; line.rotation.z = index*.5; celestial.add(line);
+      });
+      const core = new THREE.Mesh(new THREE.IcosahedronGeometry(.42,2),new THREE.MeshBasicMaterial({color:0xe9c886,wireframe:true,transparent:true,opacity:.16}));
+      celestial.add(core);
+      const moon = new THREE.Mesh(new THREE.SphereGeometry(.12,18,18),new THREE.MeshBasicMaterial({color:0xf4dfb0,transparent:true,opacity:.72}));
+      moon.position.set(2.35,0,0); celestial.add(moon);
+
+      const pointer = { x: 0, y: 0 };
+      addEventListener("pointermove", event => { pointer.x = event.clientX / innerWidth - .5; pointer.y = event.clientY / innerHeight - .5; }, { passive: true });
+      let scrollTarget = 0;
+      addEventListener("scroll", () => { scrollTarget = scrollY / Math.max(document.body.scrollHeight - innerHeight, 1); }, { passive: true });
+      const clock = new THREE.Clock();
+      function animate() {
+        const t = clock.getElapsedTime();
+        if (!reduceMotion) {
+          stars.rotation.y = t * .006 + scrollTarget * .28;
+          stars.rotation.x += (pointer.y * .04 - stars.rotation.x) * .012;
+          universe.rotation.y += (pointer.x * .08 - universe.rotation.y) * .012;
+          celestial.rotation.z = t * .018;
+          celestial.rotation.y = Math.sin(t*.12)*.16;
+          core.rotation.x = t*.08; core.rotation.y = t*.11;
+          moon.position.x = Math.cos(t*.18)*2.35; moon.position.y = Math.sin(t*.18)*1.35; moon.position.z = Math.sin(t*.18)*.5;
+        }
+        renderer.render(scene,camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
+      addEventListener("resize", () => { camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); celestial.position.x=innerWidth<760?2.25:3.8; }, { passive: true });
+      document.addEventListener("visibilitychange",()=>{ if(document.hidden) clock.stop(); else clock.start(); });
+    } catch (error) {
+      canvas.style.display = "none";
+    }
+  </script>
+</body>
+</html>
